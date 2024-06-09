@@ -150,7 +150,7 @@ Entrée:
 Sortie: 
 	- en créant un arbre quaternaire des déplacements que le serpent pourra effectuer et en le manipulant, détermine le meilleur mouvement pour que le serpent puisse survivre le plus longtemps possible  
 */
-t_move send_move(Arena* arene, Snake_head player, int IQ); 
+t_move send_move(Arena* arene, Snake_head player); 
 
 
 /*
