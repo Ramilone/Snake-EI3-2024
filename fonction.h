@@ -1,26 +1,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
-// #include "snakeAPI.h"
-// #include "clientAPI.h"
-
-
-/* Definition of a move */
-typedef enum{
-	NORTH = 0,
-	EAST = 1,
-	SOUTH = 2,
-	WEST = 3
-} 
-Move;
-
-/* defines a return code, used for playMove and getMove */
-typedef enum{
-	NORMAL_MOVE = 0,
-	WINNING_MOVE = 1,
-	LOSING_MOVE = -1
-} 
-t_return_code;
+#include <string.h>
+#include "snakeAPI.h"
+#include "clientAPI.h"
 
 
 /* Définition du type Snake */
@@ -36,7 +19,7 @@ typedef Node* Snake_head;
 /* Définition du type Cell */
 typedef struct T_cell{
 	int north_wall;
-	int est_wall;
+	int east_wall;
 	int south_wall; 
 	int west_wall; 
 
@@ -121,7 +104,7 @@ Sortie:
 	- mise à jour des coordonnées du serpent
 	- mise à jour de la taille du serpent  
 */
-void snake_move(Move m, Snake_head head, int turn); 
+void snake_move(t_move m, Snake_head head, int turn); 
 
 
 /*
@@ -145,4 +128,14 @@ Entrée:
 Sortie: 
 	- renvoie le mouvement à effectuer par le serpent de manière autonome 
 */
-Move send_move(Arena* arene, Snake_head player, Snake_head opponent); 
+t_move send_move(Arena* arene, Snake_head player); 
+
+
+/*
+Entrée: 
+	- un pointeur vers une arène 
+
+Sortie: 
+	- rien, affiche la liste des coordonnées des murs 
+*/
+void print_walls(Arena* arene); 

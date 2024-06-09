@@ -2,6 +2,7 @@
 
 
 
+
 Arena* initArena(int nbWalls, int* wall, int sizeX, int sizeY){
 
     /* Allocation de la mémoire pour l'arène */
@@ -17,7 +18,7 @@ Arena* initArena(int nbWalls, int* wall, int sizeX, int sizeY){
         for(int j=0; j<sizeY; j=j+1){
             /* On traite les murs après */
             arene->grid[i][j].north_wall = 0; 
-            arene->grid[i][j].est_wall = 0;
+            arene->grid[i][j].east_wall = 0;
             arene->grid[i][j].south_wall = 0;
             arene->grid[i][j].west_wall = 0;
             /* Au départ, toutes les cases sont vides */
@@ -28,7 +29,7 @@ Arena* initArena(int nbWalls, int* wall, int sizeX, int sizeY){
             }
             /* Bordures face est */
             if(j==sizeY-1){
-                arene->grid[i][j].est_wall = 1;           
+                arene->grid[i][j].east_wall = 1;           
             }
             /* Bordures face sud */
             if(i==sizeX-1){
@@ -36,7 +37,7 @@ Arena* initArena(int nbWalls, int* wall, int sizeX, int sizeY){
             }
             /* Bordures face ouest */
             if(j==0){
-                arene->grid[i][j].est_wall = 1; 
+                arene->grid[i][j].west_wall = 1; 
             }
         }
     }
@@ -45,7 +46,7 @@ Arena* initArena(int nbWalls, int* wall, int sizeX, int sizeY){
     for(int i=0; i<nbWalls; i=i+1){
         /* Pour un mur horizontal entre deux cases */
         if((wall[4*i]==wall[4*i+2]) && ((wall[4*i+3]==wall[4*i+1]+1) || (wall[4*i+1]==wall[4*i+2]+1))){
-            arene->grid[wall[4*i]][wall[4*i+1]].est_wall = 1;
+            arene->grid[wall[4*i]][wall[4*i+1]].east_wall = 1;
             arene->grid[wall[4*i+2]][wall[4*i+3]].west_wall = 1; 
         }
         /* Pour un mur vertical entre deux cases */
@@ -72,6 +73,15 @@ void free_arena(Arena* arene){
     }
 }
 
+
+
+void print_walls(Arena* arene){
+    for(int i=0; i<(arene->length); i=i+1){
+        for(int j=0; j<(arene->width); j=j+1){
+            printf("arene[%d, %d]: [%d, %d, %d, %d]; %d\n", i, j, arene->grid[i][j].north_wall, arene->grid[i][j].east_wall, arene->grid[i][j].south_wall, arene->grid[i][j].west_wall, arene->grid[i][j].ifSnake);
+        }
+    }
+}
 
 
 Snake_head init_snake(Arena* arene, bool id){
@@ -112,7 +122,7 @@ void delete_tail(Snake_head head){
 
 void delete_snake(Snake_head head){
     // printf("%p %p \n",head,head->next);
-    if (head==NULL){
+    if(head == NULL){
         printf("passs bon\n");
     } 
     else if(head->next == NULL){        
@@ -125,7 +135,7 @@ void delete_snake(Snake_head head){
 
 
 
-void snake_move(Move m, Snake_head head, int turn){
+void snake_move(t_move m, Snake_head head, int turn){
     /* Déclaration de la nouvelle tête */
     Snake_head new_head = (Node*)malloc(sizeof(Node));
 
@@ -186,48 +196,19 @@ void update_arena(Arena* arene, Snake_head player, Snake_head bot){
 
 
 
-Move send_move(Arena* arene, Snake_head player, Snake_head opponent){
-    if((arene->grid[player->coordonnee_x-1][player->coordonnee_y].ifSnake==0) && (arene->grid[player->coordonnee_x][player->coordonnee_y].north_wall==0)){
+t_move send_move(Arena* arene, Snake_head player){
+    if((arene->grid[player->coordonnee_x][player->coordonnee_y-1].ifSnake==0) && (arene->grid[player->coordonnee_x][player->coordonnee_y].north_wall==0)){
         return NORTH;
     }
-    else if((arene->grid[player->coordonnee_x][player->coordonnee_y+1].ifSnake==0) && (arene->grid[player->coordonnee_x][player->coordonnee_y].west_wall==0)){
+    else if((arene->grid[player->coordonnee_x+1][player->coordonnee_y].ifSnake==0) && (arene->grid[player->coordonnee_x][player->coordonnee_y].west_wall==0)){
         return WEST; 
     }
-    else if((arene->grid[player->coordonnee_x+1][player->coordonnee_y].ifSnake) && (arene->grid[player->coordonnee_x][player->coordonnee_y].south_wall==0)){
+    else if((arene->grid[player->coordonnee_x][player->coordonnee_y+1].ifSnake) && (arene->grid[player->coordonnee_x][player->coordonnee_y].south_wall==0)){
         return SOUTH;
     }
     else{
         return EAST; 
-    }
+    } 
 }
 
 
-int main(){
-   
-    int nbWalls = 1; 
-    int wall[4]; 
-    wall[0] = 0;
-    wall[1] = 0; 
-    wall[2] = 0; 
-    wall[3] = 1; 
-    int sizeX = 3;
-    int sizeY = 3; 
- 
-    Arena* arene = initArena(nbWalls, wall, sizeX, sizeY); 
-    Snake_head player = init_snake(arene, true);
-    Snake_head opponent = init_snake(arene, false);  
-    update_arena(arene, player, opponent); 
-
-    printf("let's move\n");
-    snake_move(0, player, 9);
-    printf("snap\n");
-    delete_snake(player); 
-    printf("o7 player\n");
-    delete_snake(opponent); 
-    printf("o7 opponent\n");
-    free_arena(arene); 
-    printf("o7 arene\n"); 
-
-    return 0; 
-
-}
