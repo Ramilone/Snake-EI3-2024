@@ -1,3 +1,10 @@
+/*--------------*
+ |	BENSIDHOUM  |
+ |	Nicolas		|
+ |	EISE TPA	|
+ *--------------* 
+*/
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -35,6 +42,21 @@ typedef struct T_Arena{
 	Cell** grid; 	
 }
 Arena; 
+
+
+/* Définition du type MoveTree */
+typedef struct t_movetree{
+	t_move move_type;
+	bool est_bloquant; 	 
+	// North: 0
+	// East: 1
+	// South: 2
+	// West: 3
+	struct t_movetree* father; 
+	struct t_movetree* direction[4]; 
+}
+MoveTree; 
+typedef MoveTree* Root; 
 
 
 /* 
@@ -122,13 +144,13 @@ void update_arena(Arena* arene, Snake_head player, Snake_head bot);
 /*
 Entrée: 
 	- un pointeur vers une arène 
-	- un pointeur vers la tête du serpent du player 
-	- un pointeur vers la tête du serpent du bot 
+	- un pointeur vers la tête du serpent du player  
+	- un entier pour limiter le nombre d'itération de notre algorithme
 
 Sortie: 
-	- renvoie le mouvement à effectuer par le serpent de manière autonome 
+	- en créant un arbre quaternaire des déplacements que le serpent pourra effectuer et en le manipulant, détermine le meilleur mouvement pour que le serpent puisse survivre le plus longtemps possible  
 */
-t_move send_move(Arena* arene, Snake_head player); 
+t_move send_move(Arena* arene, Snake_head player, int IQ); 
 
 
 /*
@@ -139,3 +161,65 @@ Sortie:
 	- rien, affiche la liste des coordonnées des murs 
 */
 void print_walls(Arena* arene); 
+
+
+/* 
+Entrée: 
+	- un type de mouvement 
+
+Sortie: 
+	- initialise un noeud possédant l'information du mouvement 
+*/
+MoveTree* initMoveNode(t_move m); 
+
+
+/*
+Entrée: 
+	- un pointeur vers le prédecesseur du noeud à ajouter 
+	- un pointeur vers le noeud à ajouter 
+	- l'indice du père du noeud à ajouter  
+
+Sortie: 
+	- rien, on ajoute le nouveau noeud au bon endroit 
+*/
+void addMoveNode(Root r, MoveTree* new_node, int father); 
+
+
+/*
+Entrée: 
+	- un pointeur vers la racine de l'arbre à supprimer
+
+Sortie: 
+	- rien, on libère la mémoire allouée à l'arbre de déplacement
+*/
+void deleteTree(Root r); 
+
+
+/*
+Entrée: 
+	- 4 entiers positifs ou nuls
+
+Sortie: 
+	- renvoie le plus grand entiers
+*/
+int max(int a, int b, int c, int d); 
+
+
+/*
+Entrée: 
+	- un pointeur vers la racine d'un arbre 
+
+Sortie: 
+	- renvoie la profondeur de cet arbre
+*/
+int profondeur(Root r); 
+
+
+/*
+Entrée: 
+	- un pointeur vers la racine d'un arbre
+
+Sortie: 
+	- regarde quelle est la branche de l'arbre la plus longue, et renvoie en conséquence le mouvement, fils de la racine, menant à ce chemin 
+*/
+t_move bestPrediction(Root r); 

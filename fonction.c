@@ -1,3 +1,11 @@
+/*--------------*
+ |	BENSIDHOUM  |
+ |	Nicolas		|
+ |	EISE TPA	|
+ *--------------* 
+*/
+
+
 #include "fonction.h"
 
 
@@ -82,6 +90,7 @@ void print_walls(Arena* arene){
         }
     }
 }
+
 
 
 Snake_head init_snake(Arena* arene, bool id){
@@ -196,19 +205,160 @@ void update_arena(Arena* arene, Snake_head player, Snake_head bot){
 
 
 
-t_move send_move(Arena* arene, Snake_head player){
-    if((arene->grid[player->coordonnee_x][player->coordonnee_y-1].ifSnake==0) && (arene->grid[player->coordonnee_x][player->coordonnee_y].north_wall==0)){
-        return NORTH;
+MoveTree* initMoveNode(t_move m){
+    MoveTree* move_node = (MoveTree*)malloc(sizeof(MoveTree)); 
+    move_node->move_type = m;
+    move_node->est_bloquant = 0; 
+    move_node->father = NULL; 
+    for(int i=0; i<4; i=i+1){
+        move_node->direction[i] = NULL; 
     }
-    else if((arene->grid[player->coordonnee_x+1][player->coordonnee_y].ifSnake==0) && (arene->grid[player->coordonnee_x][player->coordonnee_y].west_wall==0)){
-        return WEST; 
-    }
-    else if((arene->grid[player->coordonnee_x][player->coordonnee_y+1].ifSnake) && (arene->grid[player->coordonnee_x][player->coordonnee_y].south_wall==0)){
-        return SOUTH;
+    return move_node; 
+}
+
+
+
+void addMoveNode(Root r, MoveTree* new_node, int f){
+    if((r == NULL) || (new_node == NULL)){
+        return; 
     }
     else{
-        return EAST; 
+        r->direction[f] = new_node; 
+        new_node->father = r->direction[f]; 
+    }
+}
+
+
+
+void deleteTree(Root r){
+    if(r == NULL){
+        return;
+    }
+    else{
+        if(r->direction == NULL){
+            free(r); 
+        }
+        else{
+            for(int i=0; i<4; i=i+1){
+                deleteTree(r->direction[i]); 
+            }
+        }
+    }
+}
+
+
+
+int max(int a, int b, int c, int d){
+    if((a>b) && (a>c) && (a>d)){
+        return a; 
+    }
+    else if((b>a) && (b>c) && (b>d)){
+        return b; 
+    }
+    else if((c>a) && (c>b) && (c>d)){
+        return c; 
+    }
+    else if((d>a) && (d>b) && (d>c)){
+        return d; 
+    }
+    else{
+        /* a=b=c=d */
+        return a; 
+    }
+}
+
+
+
+int profondeur(Root r){
+    int p = 0; 
+    if(r == NULL){
+        p = 0; 
+    }
+    else if(r->direction == NULL){
+        p = 1; 
+    }
+    else{
+        p = 1 + max(profondeur(r->direction[NORTH]), profondeur(r->direction[EAST]), profondeur(r->direction[SOUTH]), profondeur(r->direction[WEST])); 
+    }
+    return p; 
+}
+
+
+
+t_move bestPrediction(Root r){
+    if(r == NULL){
+        return; 
+    }
+    else{
+        t_move best_move; 
+        int p0 = profondeur(r->direction[NORTH]); 
+        int p1 = profondeur(r->direction[EAST]);
+        int p2 = profondeur(r->direction[SOUTH]);
+        int p3 = profondeur(r->direction[WEST]); 
+        if(max(p0, p1, p2, p3) == p0){
+            best_move = NORTH; 
+        }
+        else if(max(p0, p1, p2, p3) == p1){
+            best_move = EAST; 
+        }
+        else if(max(p0, p1, p2, p3) == p2){
+            best_move = SOUTH;
+        }
+        else{
+            best_move = WEST; 
+        }
+        return best_move; 
+    }
+}
+
+
+
+t_move send_move(Arena* arene, Snake_head player){
+    if((arene->grid[player->coordonnee_x][player->coordonnee_y+1].ifSnake==0) && (arene->grid[player->coordonnee_x][player->coordonnee_y].west_wall)){
+        return NORTH;
+    }
+    else if((arene->grid[player->coordonnee_x+1][player->coordonnee_y].ifSnake==0) && (arene->grid[player->coordonnee_x][player->coordonnee_y].north_wall)){
+        return EAST;
+    }
+    else if((arene->grid[player->coordonnee_x][player->coordonnee_y-1].ifSnake==0) && (arene->grid[player->coordonnee_x][player->coordonnee_y].east_wall)){
+        return SOUTH; 
+    }
+    else{
+        return WEST; 
     } 
 }
+
+
+// t_move send_move(Arena* arene, Snake_head player, int IQ){
+
+//     int compteur = 0; 
+
+//     /* Pour la racine, pas besoin d'un mouvement, il s'agit seulement d'avoir une racine pour notre arbre */
+//     MoveTree* root = initMoveNode(NORTH); 
+//     MoveTree* copy = root; 
+//     /* Initialisation des fils de la racine à partir des données de l'arène */
+//     if((arene->grid[player->coordonnee_x][player->coordonnee_y].north_wall==1) || (arene->grid[player->coordonnee_x][player->coordonnee_y-1].ifSnake==1)){
+//         root->direction[NORTH]->est_bloquant = 1; 
+//     }
+//     if((arene->grid[player->coordonnee_x][player->coordonnee_y].east_wall==1) || (arene->grid[player->coordonnee_x+1][player->coordonnee_y].ifSnake==1)){
+//         root->direction[EAST]->est_bloquant = 1; 
+//     }   
+//     if((arene->grid[player->coordonnee_x][player->coordonnee_y].south_wall==1) || (arene->grid[player->coordonnee_x][player->coordonnee_y+1].ifSnake==1)){
+//         root->direction[SOUTH]->est_bloquant = 1; 
+//     }   
+//     if((arene->grid[player->coordonnee_x][player->coordonnee_y].west_wall==1) || (arene->grid[player->coordonnee_x-1][player->coordonnee_y].ifSnake==1)){
+//         root->direction[WEST]->est_bloquant = 1; 
+//     }    
+
+//     /* On complète l'arbre suivant les mouvements pouvant être effectués par le serpent pour le tour actuel */
+//     while(compteur < IQ){
+//         for(int i=0; i<4; i=i+1){
+//             if(copy->direction[i]->est_bloquant != 1){
+
+//             }
+//         }
+//     }
+
+// }
 
 
