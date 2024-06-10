@@ -286,46 +286,153 @@ int profondeur(Root r){
 
 
 t_move bestPrediction(Root r){
-    if(r == NULL){
-        return; 
+    t_move best_move; 
+    int p0 = profondeur(r->direction[NORTH]); 
+    int p1 = profondeur(r->direction[EAST]);
+    int p2 = profondeur(r->direction[SOUTH]);
+    int p3 = profondeur(r->direction[WEST]); 
+    if(max(p0, p1, p2, p3) == p0){
+        best_move = NORTH; 
+    }
+    else if(max(p0, p1, p2, p3) == p1){
+        best_move = EAST; 
+    }
+    else if(max(p0, p1, p2, p3) == p2){
+        best_move = SOUTH;
     }
     else{
-        t_move best_move; 
-        int p0 = profondeur(r->direction[NORTH]); 
-        int p1 = profondeur(r->direction[EAST]);
-        int p2 = profondeur(r->direction[SOUTH]);
-        int p3 = profondeur(r->direction[WEST]); 
-        if(max(p0, p1, p2, p3) == p0){
-            best_move = NORTH; 
-        }
-        else if(max(p0, p1, p2, p3) == p1){
-            best_move = EAST; 
-        }
-        else if(max(p0, p1, p2, p3) == p2){
-            best_move = SOUTH;
-        }
-        else{
-            best_move = WEST; 
-        }
-        return best_move; 
+        best_move = WEST; 
     }
+    return best_move; 
 }
 
 
 
 t_move send_move(Arena* arene, Snake_head player){
-    if((arene->grid[player->coordonnee_x][player->coordonnee_y+1].ifSnake==0) && (arene->grid[player->coordonnee_x][player->coordonnee_y].west_wall)){
-        return NORTH;
-    }
-    else if((arene->grid[player->coordonnee_x+1][player->coordonnee_y].ifSnake==0) && (arene->grid[player->coordonnee_x][player->coordonnee_y].north_wall)){
-        return EAST;
-    }
-    else if((arene->grid[player->coordonnee_x][player->coordonnee_y-1].ifSnake==0) && (arene->grid[player->coordonnee_x][player->coordonnee_y].east_wall)){
-        return SOUTH; 
+
+    if((player->coordonnee_x>0) && (player->coordonnee_x<arene->width) && (player->coordonnee_y>0) && (player->coordonnee_y<arene->length)){
+        /* On effectue un mouvement s'il n'y a pas de mur dans la direction adressée ou si la case destination est libre */
+        if((arene->grid[player->coordonnee_x][player->coordonnee_y+1].ifSnake==0) && (arene->grid[player->coordonnee_x][player->coordonnee_y].west_wall)){
+            return NORTH;
+        }
+        else if((arene->grid[player->coordonnee_x+1][player->coordonnee_y].ifSnake==0) && (arene->grid[player->coordonnee_x][player->coordonnee_y].south_wall)){
+            return EAST;
+        }
+        else if((arene->grid[player->coordonnee_x][player->coordonnee_y-1].ifSnake==0) && (arene->grid[player->coordonnee_x][player->coordonnee_y].east_wall)){
+            return SOUTH; 
+        }
+        else{
+            return WEST; 
+        } 
     }
     else{
-        return WEST; 
-    } 
+        /* Il n'y a pas de murs coupant le chemin du contour de l'arène */
+        if(player->coordonnee_x == 0){
+            if(player->coordonnee_y == 0){
+                if(arene->grid[player->coordonnee_x][player->coordonnee_y+1].ifSnake == 0){
+                    return NORTH; 
+                }
+                else{
+                    return EAST; 
+                }
+            }
+            else if(player->coordonnee_y == arene->length-1){
+                if(arene->grid[player->coordonnee_x][player->coordonnee_y-1].ifSnake == 0){
+                    return SOUTH; 
+                }
+                else{
+                    return EAST; 
+                }
+            }
+            else{
+                if(arene->grid[player->coordonnee_x][player->coordonnee_y+1].ifSnake == 0){
+                    return NORTH;
+                }
+                else{
+                    return SOUTH; 
+                }
+            }
+        }
+        else if(player->coordonnee_x == arene->width-1){
+            if(player->coordonnee_y == 0){
+                if(arene->grid[player->coordonnee_x][player->coordonnee_y+1].ifSnake == 0){
+                    return NORTH; 
+                }
+                else{
+                    return WEST; 
+                }
+            }
+            else if(player->coordonnee_y == arene->length-1){
+                if(arene->grid[player->coordonnee_x-1][player->coordonnee_y].ifSnake == 0){
+                    return WEST; 
+                }
+                else{
+                    return SOUTH; 
+                }
+            }
+            else{
+                if(arene->grid[player->coordonnee_x][player->coordonnee_y+1].ifSnake == 0){
+                    return NORTH;
+                }
+                else{
+                    return SOUTH; 
+                }
+            }
+        }
+        if(player->coordonnee_y == 0){
+            if(player->coordonnee_x == 0){
+                if(arene->grid[player->coordonnee_x][player->coordonnee_y+1].ifSnake == 0){
+                    return NORTH; 
+                }
+                else{
+                    return EAST; 
+                }            
+            }
+            else if(player->coordonnee_x == arene->width-1){
+                if(arene->grid[player->coordonnee_x][player->coordonnee_y+1].ifSnake == 0){
+                    return NORTH; 
+                }
+                else{
+                    return WEST; 
+                }
+            }
+            else{
+                if(arene->grid[player->coordonnee_x][player->coordonnee_y+1].ifSnake == 0){
+                    return NORTH;
+                }
+                else{
+                    return SOUTH; 
+                }
+            }
+        }
+        else if(player->coordonnee_y == arene->length-1){
+            if(player->coordonnee_x == 0){
+                if(arene->grid[player->coordonnee_x][player->coordonnee_y-1].ifSnake == 0){
+                    return SOUTH; 
+                }
+                else{
+                    return EAST; 
+                }
+            }
+            else if(player->coordonnee_x == arene->width-1){
+                if(arene->grid[player->coordonnee_x-1][player->coordonnee_y].ifSnake == 0){
+                    return WEST; 
+                }
+                else{
+                    return SOUTH; 
+                }
+            }
+            else{
+                if(arene->grid[player->coordonnee_x][player->coordonnee_y+1].ifSnake == 0){
+                    return NORTH;
+                }
+                else{
+                    return SOUTH; 
+                }
+            }
+        }
+    }
+
 }
 
 
